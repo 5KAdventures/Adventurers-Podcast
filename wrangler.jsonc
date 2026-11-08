@@ -1,0 +1,27 @@
+{
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "adventurers-podcast",
+  // Pinned so wrangler never has to list your accounts to find
+  // this one — that lookup needs extra token permissions and is
+  // a needless way for a deploy to fail.
+  "account_id": "60120585647ec1cb35052f6ad3a9166f",
+  "compatibility_date": "2026-08-25",
+
+  "assets": {
+    "directory": "./public",
+
+    // Serve 404.html for any path that matches no file, with a real 404
+    // status. Without this a mistyped address gets a blank page, which
+    // reads as a broken site rather than a broken link.
+    "not_found_handling": "404-page"
+  },
+
+  // No workers.dev URL — the custom domain is the only address.
+  "workers_dev": false,
+
+  "routes": [
+    { "pattern": "podcast.5kadventures.net", "custom_domain": true }
+  ],
+
+  "observability": { "enabled": true }
+}

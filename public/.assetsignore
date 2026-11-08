@@ -1,0 +1,13 @@
+# Files in public/ that are NOT site content.
+#
+# Without this, wrangler uploads everything it finds here — including
+# dotfiles. That was shipping wrangler's own account cache (account id
+# and account name) and every dated .bak of the page to the live site.
+# Same format as .gitignore.
+
+.assetsignore
+.wrangler
+.DS_Store
+*.bak
+*.bak-*
+.art-bundle.tar.gz

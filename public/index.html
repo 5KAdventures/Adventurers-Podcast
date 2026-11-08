@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>parkrun adventurers | 5kadventures.net</title>
+<meta name="description" content="parkrun adventurers — the podcast.">
+<meta name="theme-color" content="#1B1526">
+<meta property="og:type" content="website">
+<meta property="og:title" content="parkrun adventurers">
+<meta property="og:description" content="parkrun adventurers — the podcast.">
+<meta property="og:url" content="https://podcast.5kadventures.net/">
+<meta property="og:site_name" content="5kadventures.net">
+<!-- The share card, not the backdrop: the backdrop arrives in a chat as
+     a photo of three people with no clue what the link is. Absolute on
+     purpose. Made by ../../cards/make-cards.py from this same photo. -->
+<meta property="og:image" content="https://podcast.5kadventures.net/card.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="parkrun adventurers - a podcast about life, if your life is all about parkrun">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://podcast.5kadventures.net/card.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232B223D'/%3E%3Ctext x='32' y='43' font-family='Verdana,sans-serif' font-size='30' font-weight='bold' fill='%23FFAE6B' text-anchor='middle'%3E5k%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --purple:#2B223D;
+  --purple-deep:#1B1526;
+  --apricot:#FFAE6B;
+  --apricot-hi:#FFC08A;
+  --shell:min(1140px, 100% - 2.5rem);
+  --ui:"Outfit",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--purple-deep);
+  color:#fff;
+  font-family:var(--ui);
+  -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column;
+  min-height:100vh; min-height:100svh;
+}
+a{color:var(--apricot)}
+:focus-visible{outline:3px solid #fff; outline-offset:3px; border-radius:8px}
+.shell{width:var(--shell); margin-inline:auto}
+
+/* ---- background photos ----
+   Two stacked layers so one can fade in over the other. Each photo has
+   its own focal point, set from JS, because they crop differently:
+   landscape shots lose their sides, the portrait one loses top and
+   bottom. Content sits in the lower third, so faces need to sit above
+   it in every one of them. */
+.backdrop{position:fixed; inset:0; z-index:-2; overflow:hidden; background:var(--purple-deep)}
+.backdrop img{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover;
+  display:block;
+  opacity:0;
+  transition:opacity 1.6s ease-in-out;
+}
+.backdrop img.is-current{opacity:1}
+.backdrop::after{
+  content:"";
+  position:absolute; inset:0;
+  background:linear-gradient(to bottom,
+    rgba(27,21,38,.62) 0%,
+    rgba(27,21,38,.30) 22%,
+    rgba(27,21,38,.42) 46%,
+    rgba(27,21,38,.86) 74%,
+    rgba(27,21,38,.96) 100%);
+}
+@media (max-aspect-ratio:1/1){
+  .backdrop::after{
+    background:linear-gradient(to bottom,
+      rgba(27,21,38,.66) 0%,
+      rgba(27,21,38,.36) 20%,
+      rgba(27,21,38,.52) 42%,
+      rgba(27,21,38,.90) 70%,
+      rgba(27,21,38,.97) 100%);
+  }
+}
+
+/* ---- shared 5kadventures.net site bar ---- */
+.site-header .bar{
+  width:var(--shell); margin-inline:auto; padding:.9rem 0;
+  display:flex; flex-wrap:wrap; align-items:center; gap:.5rem 1.25rem;
+}
+.wordmark{
+  font-weight:800; font-size:1.2rem; letter-spacing:-.02em;
+  color:#fff; text-decoration:none; margin-right:auto;
+}
+.wordmark .dot{color:var(--apricot)}
+.wordmark .tld{font-weight:300}
+.site-nav{display:flex; flex-wrap:wrap; align-items:center; gap:.25rem}
+.site-nav a{
+  font-size:.9rem; font-weight:600; color:rgba(255,255,255,.82);
+  text-decoration:none; padding:.4rem .7rem; border-radius:8px;
+}
+.site-nav a:hover{background:rgba(255,255,255,.12); color:#fff}
+.site-nav a.cta{background:var(--apricot); color:var(--purple); font-weight:700}
+.site-nav a.cta:hover{background:var(--apricot-hi); color:var(--purple)}
+
+/* ---- main ---- */
+main{
+  flex:1 0 auto;
+  display:flex; flex-direction:column; justify-content:flex-end;
+  padding:clamp(2rem,8vh,5rem) 0 clamp(1.5rem,4vh,2.5rem);
+}
+.masthead{text-align:center; width:var(--shell); margin-inline:auto}
+.kicker{
+  font-weight:700; font-size:clamp(.8rem,1.9vw,.95rem);
+  letter-spacing:.16em; color:var(--apricot);
+  margin:0 auto .7rem;
+  text-shadow:0 1px 10px rgba(0,0,0,.6);
+}
+h1{
+  margin:0;
+  font-weight:800;
+  font-size:clamp(2rem,7vw,4.25rem);
+  line-height:1.04;
+  letter-spacing:-.025em;
+  text-shadow:0 2px 26px rgba(0,0,0,.55);
+}
+.intro{
+  margin:1rem auto 0;
+  max-width:44ch;
+  font-size:clamp(1rem,2.3vw,1.2rem);
+  font-weight:300;
+  line-height:1.6;
+  color:rgba(255,255,255,.92);
+  text-wrap:balance;
+  text-shadow:0 1px 14px rgba(0,0,0,.6);
+}
+
+/* ---- buttons ---- */
+.apps{
+  width:min(720px, 100% - 2.5rem);
+  margin:clamp(1.4rem,4vh,2.25rem) auto 0;
+  display:flex; flex-wrap:wrap; justify-content:center;
+  gap:clamp(.6rem,1.5vw,.9rem);
+}
+.app-btn{
+  --lift:0;
+  flex:1 1 240px;
+  max-width:320px;
+  min-height:52px;
+  display:inline-flex; align-items:center; justify-content:center; gap:.55em;
+  padding:.8rem 1.1rem;
+  border-radius:12px;
+  background:var(--apricot);
+  color:var(--purple);
+  font-size:clamp(.9rem,1.7vw,1rem);
+  font-weight:700;
+  text-decoration:none;
+  box-shadow:0 8px 22px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,255,255,.4);
+  transform:translateY(var(--lift));
+  transition:transform .22s cubic-bezier(.2,.7,.3,1), background-color .22s ease, box-shadow .22s ease;
+}
+.app-btn .icon{flex:none; width:17px; height:17px}
+.app-btn .label{white-space:nowrap}
+.app-btn:hover,.app-btn:focus-visible{
+  --lift:-3px; background:var(--apricot-hi);
+  box-shadow:0 14px 30px rgba(0,0,0,.44), inset 0 1px 0 rgba(255,255,255,.55);
+}
+.app-btn:active{--lift:0}
+
+/* ---- episode covers ----
+   A static row. It changes to the next set of episodes at the same
+   moment the background photo changes, so there is only ever one thing
+   moving on the page, once every 30 seconds. */
+.reel-wrap{margin-top:clamp(1.4rem,4vh,2.25rem)}
+.reel-label{
+  text-align:center;
+  font-size:.72rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase;
+  color:rgba(255,255,255,.6);
+  margin:0 0 .8rem;
+  text-shadow:0 1px 8px rgba(0,0,0,.6);
+}
+.covers{
+  width:var(--shell); margin-inline:auto;
+  display:flex; flex-wrap:wrap; justify-content:center;
+  gap:clamp(.5rem,1vw,.85rem);
+  transition:opacity .6s ease;
+}
+.covers.is-swapping{opacity:0}
+.cover{
+  display:block; flex:none;
+  width:clamp(72px, 9vw, 108px);
+  border-radius:10px;
+  overflow:hidden;
+  background:rgba(255,255,255,.06);
+  box-shadow:0 6px 18px rgba(0,0,0,.4);
+  transition:transform .25s cubic-bezier(.2,.7,.3,1), box-shadow .25s ease;
+}
+.cover img{display:block; width:100%; height:auto; aspect-ratio:1}
+.cover:hover,.cover:focus-visible{
+  transform:translateY(-4px) scale(1.04);
+  box-shadow:0 12px 26px rgba(0,0,0,.5);
+}
+/* Fewer covers on narrow screens so they stay on one line. */
+@media (max-width:900px){ .cover:nth-child(n+7){display:none} }
+@media (max-width:600px){ .cover:nth-child(n+5){display:none} }
+
+/* No motion: hold the first photo and the first set of covers. */
+@media (prefers-reduced-motion:reduce){
+  .backdrop img{transition:none}
+  .covers{transition:none}
+}
+
+/* ---- footer ---- */
+.site-footer{
+  background:rgba(27,21,38,.88);
+  color:rgba(255,255,255,.66);
+  font-size:.85rem;
+  padding:1.4rem 0;
+}
+.site-footer .bar{
+  width:var(--shell); margin-inline:auto;
+  display:flex; flex-wrap:wrap; gap:.6rem 1.5rem;
+  justify-content:space-between; align-items:center;
+}
+
+@media (max-width:520px){
+  .app-btn{flex:1 1 100%; max-width:none}
+}
+</style>
+<style id="sh-css">
+:root {
+  --sh-height: 43px;
+  --sh-font: 'Outfit', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (max-width: 520px) { :root { --sh-height: 41px; } }
+
+.site-header {
+  
+  display: block;
+  background: #1B1526;
+  border-bottom: 3px solid #FFAE6B;
+}
+
+.site-header .site-bar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  
+  height: 40px;
+  padding: 0 16px;
+  font-family: var(--sh-font);
+}
+
+.site-header .wordmark,
+.site-header .site-where,
+.site-header .site-nav a,
+.site-header .cta {
+  font-family: var(--sh-font);
+}
+
+.site-header .wordmark {
+  flex: 0 0 auto;
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: -.02em;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.site-header .wordmark .dot { color: #FFAE6B; }
+.site-header .wordmark .tld { font-weight: 300; }
+.site-header .wordmark .short { display: none; }
+
+.site-header .site-where {
+  
+  flex: 0 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.site-header .site-where::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, .28);
+}
+
+.site-header .site-nav {
+  flex: 1 1 0;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 2px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 20px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 20px), transparent);
+}
+.site-header .site-nav::-webkit-scrollbar { display: none; }
+
+.site-header .site-nav a {
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, .82);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.site-header .site-nav a:hover { background: rgba(255, 255, 255, .12); color: #fff; }
+.site-header .site-nav a:focus-visible { outline: 2px solid #FFAE6B; outline-offset: 2px; }
+.site-header .site-nav a[aria-current="page"] { background: rgba(255, 255, 255, .16); color: #fff; }
+
+.site-header .cta {
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 700;
+  background: #FFAE6B;
+  color: #2B223D;
+  text-decoration: none;
+  padding: 6px 11px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.site-header .cta:hover { background: #FFC08A; }
+.site-header .cta:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+@media (max-width: 520px) {
+  .site-header .wordmark .full,
+  .site-header .wordmark .tld { display: none; }
+  .site-header .wordmark .short { display: inline; }
+  .site-header .site-bar { height: 38px; padding: 0 10px; }
+}
+
+.site-header.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 4000;
+}
+</style>
+</head>
+<body>
+
+<div class="backdrop" aria-hidden="true">
+  <!-- No src here on purpose. The photo is chosen at random by the script
+       immediately below, which runs before the parser paints anything —
+       so exactly one background is ever fetched. Leaving a src in the
+       markup meant this image was downloaded and discarded on the 4 in 5
+       visits that picked another (130 KB, every time). -->
+  <img id="bgA" class="is-current" alt="" fetchpriority="high" decoding="async">
+  <img id="bgB" src="" alt="" decoding="async">
+</div>
+<noscript>
+  <style>.backdrop{background:url('/podcast-bg.webp') 50% 32% / cover no-repeat}</style>
+</noscript>
+<script>
+  /* The one source of truth for the background photos. The main script
+     at the end of the body reads this array; adding a photo means adding
+     one entry HERE and nowhere else.
+       pos         — landscape screens, where a photo loses its sides
+       posPortrait — tall screens, where it loses top and bottom */
+  window.BACKGROUNDS = [
+    { src:'/podcast-bg.webp', pos:'50% 32%', posPortrait:'50% 28%' },
+    { src:'/bg-2.webp',       pos:'50% 20%', posPortrait:'56% 20%' },
+    { src:'/bg-3.webp',       pos:'50% 0%',  posPortrait:'50% 6%'  },
+    { src:'/bg-4.webp',       pos:'50% 34%', posPortrait:'50% 30%' },
+    { src:'/bg-5.webp',       pos:'50% 30%', posPortrait:'50% 28%' }
+  ];
+  window.BG_START = Math.floor(Math.random() * window.BACKGROUNDS.length);
+  (function () {
+    var bg = window.BACKGROUNDS[window.BG_START];
+    var tall = window.matchMedia('(max-aspect-ratio: 1/1)').matches;
+    var el = document.getElementById('bgA');
+    el.style.objectPosition = tall ? bg.posPortrait : bg.pos;
+    el.src = bg.src;
+  })();
+</script>
+
+<header class="site-header sticky" data-sh>
+  <div class="site-bar">
+    <a class="wordmark" href="https://5kadventures.net"><span class="full">5kadventures</span><span class="short">5k</span><span class="dot">.</span><span class="tld">net</span></a>
+    <span class="site-where" aria-current="page">Podcast</span>
+    <nav class="site-nav" aria-label="5kadventures.net"></nav>
+    <a class="cta" href="https://5kadventures.net">All the apps</a>
+  </div>
+</header>
+
+<main>
+
+  <div class="masthead">
+    <p class="kicker">LIFE@parkrun</p>
+    <h1>parkrun adventurers</h1>
+    <p class="intro">parkrun adventurers is a podcast about life, if your
+      life is all about parkrun. Celebrating the events, the people and
+      the places a barcode can take you. Brought to you by people sharing
+      the passion: for life and for parkrun.</p>
+  </div>
+
+  <nav class="apps" aria-label="Podcast links">
+
+    <a class="app-btn" href="https://parkrunadventurers.podbean.com/" rel="noopener">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-5a3.5 3.5 0 0 0-7 0v5A3.5 3.5 0 0 0 12 15z"/>
+        <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/>
+        <path d="M12 18v3.5"/>
+      </svg>
+      <span class="label">Listen on Podbean</span>
+    </a>
+
+    <a class="app-btn" href="https://log.5kadventures.net">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15.5H6.5A2.5 2.5 0 0 0 4 21z"/>
+        <path d="M8 7.5h7M8 11h7"/>
+      </svg>
+      <span class="label">Adventurers Log</span>
+    </a>
+
+  </nav>
+
+  <section class="reel-wrap" aria-label="Recent episodes">
+    <p class="reel-label">Recent episodes</p>
+    <!-- The first set is in the HTML so the links exist without JS;
+         the script swaps the set from then on. -->
+    <div class="covers" id="covers">
+      <a class="cover" href="https://parkrunadventurers.podbean.com/e/episode-463-when-dazza-met-morky/" rel="noopener"><img src="/art/ep463.webp" alt="Episode 463 - When Dazza Met Morky" width="240" height="240" decoding="async"></a>
+      <a class="cover" href="https://parkrunadventurers.podbean.com/e/episode-462-surprise/" rel="noopener"><img src="/art/ep462.webp" alt="Episode 462 - Surprise!" width="240" height="240" decoding="async"></a>
+      <a class="cover" href="https://parkrunadventurers.podbean.com/e/episode-461-motionless-to-marathon/" rel="noopener"><img src="/art/ep461.webp" alt="Episode 461 - Motionless to Marathon" width="240" height="240" decoding="async"></a>
+      <a class="cover" href="https://parkrunadventurers.podbean.com/e/episode-460-across-the-ditch/" rel="noopener"><img src="/art/ep460.webp" alt="Episode 460 - Across The Ditch" width="240" height="240" decoding="async"></a>
+      <a class="cover" href="https://parkrunadventurers.podbean.com/e/episode-459-what-is-your-colour/" rel="noopener"><img src="/art/ep459.webp" alt="Episode 459 - What is your Colour?" width="240" height="240" decoding="async"></a>
+      <a class="cover" href="https://parkrunadventurers.podbean.com/e/episode-458-the-unicorn/" rel="noopener"><img src="/art/ep458.webp" alt="Episode 458 - The Unicorn" width="240" height="240" decoding="async"></a>
+      <a class="cover" href="https://parkrunadventurers.podbean.com/e/episode-457-legs-eleven/" rel="noopener"><img src="/art/ep457.webp" alt="Episode 457 - Legs Eleven" width="240" height="240" decoding="async"></a>
+      <a class="cover" href="https://parkrunadventurers.podbean.com/e/episode-456-the-hype-team/" rel="noopener"><img src="/art/ep456.webp" alt="Episode 456 - The hype team" width="240" height="240" decoding="async"></a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="bar">
+    <span>&copy; <span id="yr">2026</span> 5kadventures.net</span>
+    <span>An independent project, not affiliated with, endorsed by, or connected to parkrun Global Limited.</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  /* ------------------------------------------------------------------
+     BACKGROUNDS
+     `pos` is the focal point on landscape screens, `posPortrait` on
+     tall ones. They differ because a photo is cropped on its sides on
+     a wide screen and top-and-bottom on a narrow one. To add a photo:
+     drop the file in /public, add an entry here, then check it at both
+     shapes — faces need to sit above the text.
+     ------------------------------------------------------------------ */
+  var BACKGROUNDS = window.BACKGROUNDS;
+
+  /* EPISODES — newest first. The row shows a slice at a time. */
+  var EPISODES = [
+    /* Order here is the order shown; the number usually follows it. */
+    [463,'Episode 463 - When Dazza Met Morky','episode-463-when-dazza-met-morky'],
+    [462,'Episode 462 - Surprise!','episode-462-surprise'],
+    [461,'Episode 461 - Motionless to Marathon','episode-461-motionless-to-marathon'],
+    [460,'Episode 460 - Across The Ditch','episode-460-across-the-ditch'],
+    [459,'Episode 459 - What is your Colour?','episode-459-what-is-your-colour'],
+    [458,'Episode 458 - The Unicorn','episode-458-the-unicorn'],
+    [457,'Episode 457 - Legs Eleven','episode-457-legs-eleven'],
+    [456,'Episode 456 - The hype team','episode-456-the-hype-team'],
+    [455,'Episode 455 - Tantrums, Tears and Tribulations','episode-455-tantrums-tears-and-tribulations'],
+    [454,'Episode 454 - Old and New','episode-454-old-and-new'],
+    [453,'Episode 453 - Half Way There','episode-453-half-way-there'],
+    [452,'Episode 452 - The Away Game','episode-452-the-away-game'],
+    [451,'Episode 451 - Let those pies fly high','episode-451-let-those-pies-fly-high'],
+    [450,'Episode 450 - Celebrations and pronunciations','episode-450-celebrations-and-pronunciations'],
+    [449,'Episode 449 - Is it your first time?','episode-449-is-it-your-first-time'],
+    [448,'Episode 448 - Surrounded by clowns','episode-448-surrounded-by-clowns'],
+    [447,'Episode 447 - You raise me up','episode-447-you-raise-me-up'],
+    [446,'Episode 446 - Show us your weed','episode-446-show-us-your-weed'],
+    [445,'Episode 445 - Rainbows, Recordings and the Riesling Trail','episode-445-rainbows-recordings-and-the-riesling-trail'],
+    [444,'Episode 444 - Addicted to Love','episode-444-addicted-to-love'],
+    [443,'Episode 443 - Gelato in Milano','episode-443-gelato-in-milano'],
+    [442,'Episode 442 - A Lil Bit of Hope','episode-442-a-lil-bit-of-hope'],
+    [441,'Episode 441 - All Aboard 2026','episode-441-all-aboard-2026'],
+    [440,'Episode 440 - Stop The Clock','episode-440-stop-the-clock'],
+    [439,'Episode 439 - Legendary Intern','episode-439-legendary-intern'],
+    [438,'Episode 438 - Lota Love to Give','episode-438-lota-love-to-give'],
+    [437,'Episode 437 - Woe is a crowd','episode-437-woe-is-a-crowd'],
+    [436,'Episode 436 - The Vote That Counts','episode-436-the-vote-that-counts'],
+    [435,'Episode 435 - The Restructure','episode-435-the-restructure'],
+    [434,'Episode 434 - It’s Upside Down','episode-434-it-s-upside-down'],
+    [433,'Episode 433 - Ready, Set, Streak...','episode-433-ready-set-streak']
+  ];
+
+  var PER_SET = 8;
+  var INTERVAL = 15000;   // 15 seconds between changes
+  var FADE = 1600;        // must match the CSS transition on .backdrop img
+
+  var a = document.getElementById('bgA');
+  var b = document.getElementById('bgB');
+  var coversEl = document.getElementById('covers');
+  var portrait = window.matchMedia('(max-aspect-ratio: 1/1)');
+  var still = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  /* Start on a random photo, so a repeat visitor doesn't always open on
+     the same one. Set synchronously, before first paint, rather than
+     fading a second image in after load — the markup keeps podcast-bg
+     as its src so the page still shows something without JS, and the
+     browser only re-points it on the 4-in-5 visits that pick another. */
+  var index = window.BG_START;   // chosen in the head-of-body script
+  var showing = a;               // the layer currently visible
+
+  /* The cover row is deliberately NOT randomised: it always opens on the
+     eight most recent episodes and walks forward from there. It used to
+     share the background's index, which is why it needs its own. */
+  var coverSet = 0;
+
+  function focal(bg) { return portrait.matches ? bg.posPortrait : bg.pos; }
+
+  // Keep the visible photo's focal point right if the window is reshaped.
+  portrait.addEventListener('change', function () {
+    showing.style.objectPosition = focal(BACKGROUNDS[index]);
+  });
+
+  function renderCovers(setIndex) {
+    var start = (setIndex * PER_SET) % EPISODES.length;
+    var html = '';
+    for (var i = 0; i < PER_SET; i++) {
+      var e = EPISODES[(start + i) % EPISODES.length];
+      var title = String(e[1]).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+      html += '<a class="cover" href="https://parkrunadventurers.podbean.com/e/' + e[2] + '/" rel="noopener">'
+            + '<img src="/art/ep' + e[0] + '.webp" alt="' + title + '" width="240" height="240" '
+            + 'loading="lazy" decoding="async"></a>';
+    }
+    coversEl.innerHTML = html;
+  }
+
+  function advance() {
+    index = (index + 1) % BACKGROUNDS.length;
+    coverSet = (coverSet + 1) % EPISODES.length;
+    var next = BACKGROUNDS[index];
+    var incoming = (showing === a) ? b : a;
+
+    // Decode before showing it, so the crossfade never reveals a blank layer.
+    var img = new Image();
+    img.onload = function () {
+      incoming.src = next.src;
+      incoming.style.objectPosition = focal(next);
+      incoming.classList.add('is-current');
+      showing.classList.remove('is-current');
+      showing = incoming;
+
+      coversEl.classList.add('is-swapping');
+      setTimeout(function () {
+        renderCovers(coverSet);
+        coversEl.classList.remove('is-swapping');
+      }, 600);
+    };
+    img.src = next.src;
+  }
+
+  /* Run the timer only while the tab is actually being looked at.
+     Browsers throttle — and Safari suspends — timers in background
+     tabs, so left to itself the gap between changes is unpredictable
+     and feels far longer than it is. Stopping and restarting means the
+     wait after switching back is always a full interval. */
+  var timer = null;
+
+  function start() { if (!timer) timer = setInterval(advance, INTERVAL); }
+  function stop()  { if (timer) { clearInterval(timer); timer = null; } }
+
+  if (!still.matches && BACKGROUNDS.length > 1) {
+    start();
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) stop(); else start();
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
